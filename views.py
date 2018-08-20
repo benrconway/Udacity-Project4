@@ -1,9 +1,10 @@
 # Here I will write the Flask server part of the application
 from models import Base, User
-from flask import Flask, jsonify, request, url_for, abort, g, render_template
+from flask import Flask, jsonify, request, redirect, url_for, abort, flash, g, render_template
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import create_engine
+from flask import session as login_session
 
 from flask.ext.httpauth import HTTPBasicAuth
 import json
@@ -24,6 +25,7 @@ session = DBSession()
 app = Flask(__name__)
 
 @app.route('/users', methods=['POST'])
+
 @app.route('/login')
 @app.route('oauth/<str:provider>', methods=['POST'])
 @app.route('/token')
@@ -31,33 +33,62 @@ app = Flask(__name__)
 
 
 @app.route('/')
-@app.route('/catalogue', methods=['GET', 'POST'])
-@app.route('/catalogue/<int:catalogue_id>/', methods=['GET', 'PUT', 'DELETE'])
-@app.route('/catalogue/<int:catalogue_id>/items', methods=['GET', 'POST'])
-@app.route('/catalogue/<int:catalogue_id>/items/<int:item_id>/', methods=['GET', 'PUT', 'DELETE'])
-
-@app.route('/api/catalogue/all')
-def apiMain():
-    catalogues = session.query(Catalogues).all()
+@app.route('/categories')
+def homeRouteHandler():
+    categories = session.query(Categories).all()
     items = session.query(Items).all()
-    return jsonify(Catalogues=[catalog.serialize for catalog in catalogues],
+
+    return render_template('home.html', categories=categories, items=items)
+
+
+@app.route('/categories/<str:category_name>/')
+@app.route('/categories/<str:category_name>/items')
+def showOneCategoryAndItems():
+        categories = session.query(Categories).all()
+        category =
+            list(filter(lambda category: category.name = category_name, categories)
+        items = session.query(Items).filter_by(category_id=category.id).all()
+        return render_template('singleCategory.html', categories=categories, chosen=category, items=items)
+
+@app.route('/categories/<str:category_name>/items/new', methods=['GET', 'POST'])
+def newItem():
+    if request.method == 'POST':
+        flash("{0} has been added to {1}.".format(item.name, category.name))
+        return redirect(url_for('singleCategory.html'))
+    else:
+        return render_template('newItem.html')
+
+
+@app.route('/categories/<str:category_name>/items/<int:item_id>/', methods=['GET', 'PUT', 'DELETE'])
+def singleItem():
+    category = session.query(Categories).filter_by(name=category_name).one()
+    item = session.query(Items).filter_by(id=item_id).one()
+    if request.method =='PUT':
+        flash("Changes have been successfully made to {0}.".format(item.name))
+        return redirect(url_for())
+    elif request.method == 'DELETE':
+        flash("{0} has been deleted from {1}.".format(item.name, category.name))
+        return redirect(url_for('singleCategory.html'))
+    else:
+        render_template('singleItem.html', category=category, item=item)
+
+
+@app.route('/api/categories/')
+def apiMain():
+    categories = session.query(Categories).all()
+    items = session.query(Items).all()
+    return jsonify(Categories=[catalog.serialize for catalog in catalogues],
+        Items=[item.serialize for item in items])
+
+@app.route('/api/categories/<str:category_name>/items')
+def catagoryAndItems():
+    category = session.query(Categories).filter_by(id=category_id).one()
+    items = session.query(Items).filter_by(category_id=category_id).all()
+    return jsonify(Categories=[catalogue.serialize],
         Items=[item.serialize for item in items])
 
 
-# Maybe don't need this one
-# @app.route('/api/catalogue/<int:catalogue_id>')
-# def apiCatalogueItems():
-
-
-@app.route('/api/catalogue/<int:catalogue_id>/items')
-def catalogueAndItems():
-    catalogue = session.query(Catalogues).filter_by(id=catalogue_id).one()
-    items = session.query(Items).filter_by(catalogue_id=catalogue_id).all()
-    return jsonify(Catalogues=[catalogue.serialize],
-        Items=[item.serialize for item in items])
-
-
-@app.route('/api/catalogue/<int:catalogue_id>/items/<int:item_id>')
+@app.route('/api/category/<str:category_name>/items/<int:item_id>')
 def singleItem():
     item = session.query(Items).filter_by(id=item_id).one()
     return jsonify(Items=[item.serialize])

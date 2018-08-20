@@ -12,7 +12,6 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
     email = Column(String(250), nullable=False)
-    picture = Column(String(250))
     password_hash = Column(String(250), nullable=false)
 
     def hash_password(self, password):
@@ -21,18 +20,11 @@ class User(Base):
     def verify_password(self, password):
         return pwd_context.verify(password, self.password_hash)
 
-    @property
-    def serialize(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'email': self.email
-        }
-
 class Category(Base):
     __tablename__ = 'categories'
     id = Column(Integer, primary_key = True)
     name = Column(String(80), nullable = False)
+    description = Column(String(250))
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(Users)
 
@@ -41,6 +33,7 @@ class Category(Base):
         return {
             'id': self.id,
             'name': self.name,
+            'description': self.description,
             'user_id': self.user_id
         }
 
