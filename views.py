@@ -44,19 +44,20 @@ def homeRouteHandler():
 @app.route('/categories/<str:category_name>/')
 @app.route('/categories/<str:category_name>/items')
 def showOneCategoryAndItems():
-        categories = session.query(Categories).all()
-        category =
-            list(filter(lambda category: category.name = category_name, categories)
-        items = session.query(Items).filter_by(category_id=category.id).all()
-        return render_template('singleCategory.html', categories=categories, chosen=category, items=items)
+    categories = session.query(Categories).all()
+    category = list(filter(lambda category: category.name = category_name, categories)
+    items = session.query(Items).filter_by(category_id=category.id).all()
+    return render_template('singleCategory.html', categories=categories, chosen=category, items=items)
 
 @app.route('/categories/<str:category_name>/items/new', methods=['GET', 'POST'])
 def newItem():
+    category = session.query(Categories).filter_by(name=category_name).one()
     if request.method == 'POST':
+        # TODO: create object and store it in the database
         flash("{0} has been added to {1}.".format(item.name, category.name))
         return redirect(url_for('singleCategory.html'))
     else:
-        return render_template('newItem.html')
+        return render_template('newItem.html', category=category)
 
 
 @app.route('/categories/<str:category_name>/items/<int:item_id>/', methods=['GET', 'PUT', 'DELETE'])
@@ -64,14 +65,17 @@ def singleItem():
     category = session.query(Categories).filter_by(name=category_name).one()
     item = session.query(Items).filter_by(id=item_id).one()
     if request.method =='PUT':
+        # TODO: Update object in database
         flash("Changes have been successfully made to {0}.".format(item.name))
         return redirect(url_for())
     elif request.method == 'DELETE':
+        # TODO: Delete object from database
         flash("{0} has been deleted from {1}.".format(item.name, category.name))
         return redirect(url_for('singleCategory.html'))
     else:
         render_template('singleItem.html', category=category, item=item)
 
+# TODO: add routes for edit and delete pages.
 
 @app.route('/api/categories/')
 def apiMain():

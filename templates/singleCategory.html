@@ -1,0 +1,13 @@
+{% extends 'main.html' %}
+{% block content %}
+<!-- Takes in one category and a list of items -->
+<h3>{{category.name}}<h3>
+  <a href='{{url_for('newItem', category_name=category.name)}}'>Add a new item</a>
+    {% for item in items %}
+      <li><a href='{{url_for('singleItem', category_name=category.name, item_id = item.id)}}'>{{item.name}}</a></li>
+      <a href='{{url_for('editItem', category_name=category.name, item_id=item.id)}}'>Edit</a>
+      <a href='{{url_for('deleteItem', category_name=category.name, item_id=item.id)}}'>Delete</a>
+      <br>
+    {% endfor %}
+
+{% endblock %}
