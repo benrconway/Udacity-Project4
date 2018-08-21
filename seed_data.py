@@ -14,7 +14,6 @@ session = DBSession()
 
 user = User(name="Ben", email="email@email.com", password=self.hash_password("password"))
 
-
 category = Category(name="Nature", description="A list of courses and information relating to being out and at one with our natural surroundings", user=user)
 
 item = Item(name="Monica Wilde", description="A blog on wild food, wild medicine, wild living and the old ways of doing and being as well as a place to learn by being in nature",

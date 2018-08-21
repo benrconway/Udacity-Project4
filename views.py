@@ -1,5 +1,4 @@
-# Here I will write the Flask server part of the application
-from models import Base, User
+from models import Base, User, Category, Item
 from flask import Flask, jsonify, request, redirect, url_for, abort, flash, g, render_template
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
