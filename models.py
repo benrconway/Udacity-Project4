@@ -6,13 +6,12 @@ from passlib.apps import custom_app_context as pwd_context
 
 Base = declarative_base()
 
-class User(Base):
+class Users(Base):
     __tablename__ = 'users'
-
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
     email = Column(String(250), nullable=False)
-    password_hash = Column(String(250), nullable=false)
+    password_hash = Column(String(250), nullable=False)
 
     def hash_password(self, password):
         self.password_hash = pwd_context.encrypt(password)
@@ -20,12 +19,12 @@ class User(Base):
     def verify_password(self, password):
         return pwd_context.verify(password, self.password_hash)
 
-class Category(Base):
+class Categories(Base):
     __tablename__ = 'categories'
     id = Column(Integer, primary_key = True)
     name = Column(String(80), nullable = False)
     description = Column(String(250))
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship(Users)
 
     @property
@@ -37,15 +36,15 @@ class Category(Base):
             'user_id': self.user_id
         }
 
-class Item(Base):
+class Items(Base):
     __tablename__ = 'items'
     id = Column(Integer, primary_key = True)
     name = Column(String(80), nullable = False)
     description = Column(String(250))
     location = Column(String(250))
     url = Column(String(250))
-    category_id = Column(Integer, ForeignKey('category.id'))
-    user_id = Column(Integer, ForeignKey('user.id'))
+    category_id = Column(Integer, ForeignKey('categories.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship(Users)
     category = relationship(Categories)
 

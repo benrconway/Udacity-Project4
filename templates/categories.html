@@ -19,8 +19,11 @@
       <h3>Our full and unfiltered list of content!</h3>
         <ul>
           {% for item in items %}
-          {% category = list(filter(lambda category: category.id == item.category_id, categories)) %}
+            {% for category in categories %}
+              {% if item.category_id == category.id %}
           <li><a href='{{url_for('singleItem', category_name=category.name, item_id = item.id)}}'>{{item.name}}</a></li>
+              {% endif %}
+            {% endfor %}
           {% endfor %}
         </ul>
     </div>

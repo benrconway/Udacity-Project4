@@ -1,0 +1,13 @@
+<!-- Takes in a single item and its category-->
+{% extends 'main.html' %}
+{% block content %}
+
+<h3>{{item.name}}</h3>
+<p>{{item.description}}</p>
+<p>Location: {{item.location}}</p>
+<a href="{{item.url}}">Website</a>
+<br><br>
+<a href='{{url_for('editItem', category_name=category.name, item_id=item.id)}}'>Edit</a>
+<a href='{{url_for('deleteItem', category_name=category.name, item_id=item.id)}}'>Delete</a>
+
+{% endblock %}

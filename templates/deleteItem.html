@@ -1,9 +1,9 @@
-<!-- Takes in one item and its category  -->
 {% extends 'main.html' %}
 {% block content %}
 <p><b>Are you sure you want to delete {{item.name}} from {{category.name}}?</b></p>
-<form action="{{url_for('singleItem', category_name=category.name, item_id=item.id)}}" method="DELETE">
+<form action='{{url_for('singleItem', category_name=category.name, item_id=item.id)}}' method="DELETE">
   <input type="submit" value="Delete">
 </form>
-<a href="{{url_for('singleCategory', category_name=category.name)}}">Cancel</a>
+<br>
+<a href='{{url_for('showOneCategoryAndItems', category_name=category.name)}}'>Cancel</a>
 {% endblock %}
