@@ -2,7 +2,7 @@
 {% block content %}
 <!-- Takes in a single category as reference -->
 <h3>Add an item to our content<h3>
-<form action="{{url_for('newItem', category_name=category.name)}}" method="PUT" enctype="multipart/form-data">
+<form action="{{url_for('singleItem', category_name=category.name, item_id=item.id)}}" method="PUT">
   <label for="name">Name</label>
   <input type="text" name="" value="{{item.name}}">
     </br>
