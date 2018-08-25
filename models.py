@@ -6,6 +6,7 @@ from passlib.apps import custom_app_context as pwd_context
 
 Base = declarative_base()
 
+
 class Users(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
@@ -19,10 +20,11 @@ class Users(Base):
     def verify_password(self, password):
         return pwd_context.verify(password, self.password_hash)
 
+
 class Categories(Base):
     __tablename__ = 'categories'
-    id = Column(Integer, primary_key = True)
-    name = Column(String(80), nullable = False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80), nullable=False)
     description = Column(String(250))
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship(Users)
@@ -36,10 +38,11 @@ class Categories(Base):
             'user_id': self.user_id
         }
 
+
 class Items(Base):
     __tablename__ = 'items'
-    id = Column(Integer, primary_key = True)
-    name = Column(String(80), nullable = False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80), nullable=False)
     description = Column(String(250))
     location = Column(String(250))
     url = Column(String(250))
@@ -59,6 +62,7 @@ class Items(Base):
             'user_id': self.user_id,
             'category_id': self.category_id
         }
+
 
 engine = create_engine('sqlite:///itemcatalogue.db')
 
