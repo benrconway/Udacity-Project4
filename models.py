@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from passlib.apps import custom_app_context as pwd_context
 
 Base = declarative_base()
-
+key = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
 
 class Users(Base):
     __tablename__ = 'users'
@@ -14,11 +14,29 @@ class Users(Base):
     email = Column(String(250), nullable=False)
     password_hash = Column(String(250), nullable=False)
 
-    def hash_password(self, password):
+    def hashPassword(self, password):
         self.password_hash = pwd_context.encrypt(password)
 
-    def verify_password(self, password):
+    def verifyPassword(self, password):
         return pwd_context.verify(password, self.password_hash)
+
+    def generateToken(self, expiration=600):
+    	s = Serializer(key, expires_in = expiration)
+    	return s.dumps({'id': self.id })
+
+    @staticmethod
+    def verifyToken(token):
+    	s = Serializer(key)
+    	try:
+    		data = s.loads(token)
+    	except SignatureExpired:
+    		#Valid Token, but expired
+    		return None
+    	except BadSignature:
+    		#Invalid Token
+    		return None
+    	user_id = data['id']
+    	return user_id
 
 
 class Categories(Base):

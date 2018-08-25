@@ -24,12 +24,119 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 app = Flask(__name__)
 
-# @app.route('/users', methods=['POST'])
-#
-# @app.route('/login')
-# @app.route('/oauth/<string:provider>', methods=['POST'])
-# @app.route('/token')
+# Load client id for my google oauth
+CLIENT_ID = json.loads(
+    open('client_secrets.json', 'r').read())['web']['client_id']
 
+
+@auth.verify_password
+def verifyPassword(identifier, password):
+    # Identifier can be a token or a username, verify will suply which it is.
+    user_id = User.verifyToken(identifier)
+    if user_id:
+        user = session.query(User).filter_by(id = user_id).one()
+    else:
+        user = session.query(User).filter_by(username = identifier).first()
+        if not user or not user.verifyPassword(password):
+            return False
+    g.user = user
+    return True
+
+
+@app.route('/oauth/<string:provider>', methods=['POST'])
+def loginWithOauth(provider):
+    oneTimeCode = request.json.get('auth_code')
+    if provider == 'google':
+        # If google was the provider, exchange the one time code with google
+        # for an access token
+        try:
+            oauthFlow = flow_from_clientsecrets('client_secrets.json', scope='')
+            oauthFlow.redirect_uri = 'postmessage'
+            userCredentials = oauth_flow.step2_exchange(oneTimeCode)
+        except FlowExchangeError:
+            return respondWith('Failed to authorize with Google', 401)
+
+        # test token validity
+        googleAccessToken = userCredentials.access_token
+        url = 'https://googleapis.com/oauth2/v1/tokeninfo?access_token={0}'.format(googleAccessToken)  #NOQA
+        googleResult = requests.get(url)[1].json()
+
+         # refactored because it doesn't make sense to have httplib2 and requests
+        # requestor = httplib2.Http()
+        # googleResult = json.loads(requestor.request(url, 'GET')[1])
+
+        # ensure there was no error before proceeding.
+        if googleResult.get('error') is not None:
+            return respondWith(result.get('error'), 500)
+
+        # ensure that the following is true:
+        # 1. Token and given user IDs match
+        googleId = userCredentials.id_token['sub']
+        if googleId != googleResult['user_id']:
+            return respondWith("User ID's do not match", 401)
+
+        # 2. The token is has been collected for this web app
+        if googleResult != CLIENT_ID:
+            return respondWith("Token was not issued for this application", 401)
+
+        # 3. That they are not already signed in.
+        # TODO: create conditional logic that only shows login or logout
+        # and will do correct functionality for that based on switch statement.
+        currentCredentials = login_session.get('credentials')
+        currentGoogleId = login_session.get('googleId')
+        if currentCredentials is not None and googleId == currentGoogleId:
+            return respondWith('User is already connected.', 200)
+
+
+        userinfoURL = "https://www.googleapis.com/oauth2/v1/userinfo"
+        params = {'access_token': googleAccessToken, 'alt':'json'}
+        # if it doesn't work, separate request and .json()
+        data = requests.get(userinfoURL, params=params).json()
+
+        name = data['name']
+        email = data['email']
+
+        # check to see if they already exist.
+        user = session.query(Users).filter_by(email=email).first()
+        if not user:
+            user = Users(name=name, email=email)
+            dbAddUpdate(user)
+
+        # because the user is not of the website, they will need a token
+        # rather than a using a password to authenticate.
+        # integer is duration
+        token = user.generateToken(600)
+        return jsonify({'token': token.decode('ascii')})
+    else:
+        return respondWith('Unrecoginized Provider', 500)
+
+
+@app.route('/token')
+@auth.login_required
+def getAuthToken():
+    token = g.user.generateToken()
+    return jsonify({'token': token.decode('ascii')})
+
+@app.route('/users', methods=['POST'])
+def newUser():
+    name = request.form['name']
+    password = request.form['password']
+
+    if name is None or password is None:
+        return respondWith('Missing arguments', 400)
+
+    if session.query(Users).filter_by(name=name).first() is not None:
+        return respondWith('User already exists', 200)
+
+    user = Users(name=name)
+    user.hashPassword(password)
+    dbAddUpdate(user)
+    return jsonify({'name': user.name}), 201
+
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
 
 @app.route('/')
 @app.route('/categories/')
@@ -61,8 +168,7 @@ def newItem(category_name):
         url = request.form['url']
         item = Items(name=name, description=description, location=location,
                      url=url, category=category)
-        session.add(item)
-        session.commit()
+        dbAddUpdate(item)
         # TODO: Add user from login_session
         flash("{0} has been added to {1}.".format(item.name, category.name))
         return redirect(url_for('showOneCategoryAndItems',
@@ -88,8 +194,7 @@ def editItem(category_name, item_id):
         item.description = request.form['description']
         item.location = request.form['location']
         item.url = request.form['url']
-        session.add(item)
-        session.commit()
+        dbAddUpdate(item)
         flash("Changes have been successfully made to {0}.".format(item.name))
         return redirect(url_for('showOneCategoryAndItems',
                         category_name=category_name))
@@ -103,8 +208,7 @@ def deleteItem(category_name, item_id):
     category = session.query(Categories).filter_by(name=category_name).one()
     item = session.query(Items).filter_by(id=item_id).one()
     if request.method == 'POST':
-        session.delete(item)
-        session.commit()
+        dbAddUpdate(item)
         flash("{0} has been deleted from {1}.".format(item.name,
                                                       category.name))
         return redirect(url_for('showOneCategoryAndItems',
@@ -135,6 +239,14 @@ def apiSingleItem(category_name, item_id):
     item = session.query(Items).filter_by(id=item_id).one()
     return jsonify(Items=[item.serialize])
 
+def respondWith(message, code):
+    response = make_response(json_dumps(message), code)
+    response.headers['Content-Type'] = 'application/json'
+    return response
+
+def dbAddUpdate(object):
+    session.add(object)
+    session.commit()
 
 if __name__ == '__main__':
     app.secret_key = "password"
