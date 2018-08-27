@@ -12,7 +12,7 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 user = Users(name="Ben", email="email@email.com")
-user.hash_password("password")
+user.hashPassword("password")
 
 category = Categories(name="Nature",
                       description="A list of courses and information relating \

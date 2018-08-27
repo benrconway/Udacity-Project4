@@ -8,24 +8,18 @@
     <div>
       <h1>Login</h1>
     </div>
-
-
-
-
-<!-- GOOGLE PLUS SIGN IN-->
-
-
-          <div id="signinButton">
-          <span class="g-signin"
-            data-scope="openid email"
-            data-clientid="591163711704-kdf5rrtgmq6vu63lh0fngqdvl5nib5ji.apps.googleusercontent.com"
-            data-redirecturi="postmessage"
-            data-accesstype="offline"
-            data-cookiepolicy="single_host_origin"
-            data-callback="signInCallback"
-            data-approvalprompt="force">
-          </span>
-        </div>
+    <!-- Google Sign-In button -->
+      <div id="signinButton">
+      <span class="g-signin"
+        data-scope="openid email"
+        data-clientid="591163711704-kdf5rrtgmq6vu63lh0fngqdvl5nib5ji.apps.googleusercontent.com"
+        data-redirecturi="postmessage"
+        data-accesstype="offline"
+        data-cookiepolicy="single_host_origin"
+        data-callback="signInCallback"
+        data-approvalprompt="force">
+      </span>
+    </div>
 
 <div id="result"></div>
 
@@ -37,7 +31,7 @@ function signInCallback(authResult) {
     // Send the auth-code to the server for further processing
     $.ajax({
       type: 'POST',
-      url: '/oauth/google?state={{STATE}}',
+      url: '/oauth/google',
       processData: false,
       data: authResult['code'],
       contentType: 'application/octet-stream; charset=utf-8',
@@ -46,7 +40,7 @@ function signInCallback(authResult) {
         if (result) {
           $('#result').html('Login Successful!</br>'+ result + '</br>Redirecting...')
          setTimeout(function() {
-          window.location.href = "/categories";
+          window.top.location.href = "http://localhost:5000/categories";
         }, 5000);
       } else if (authResult['error']) {
     console.log('There was an error: ' + authResult['error']);
@@ -58,7 +52,7 @@ function signInCallback(authResult) {
 </script>
 
 
-<!-- TODO: Make a version of this code to handle signing out. -->
+<!-- TODO: Investigate to understand this code and make my own version -->
 <!--a href='#' onclick="signOut();">Sign Out from Google <a/>
 <!--script>
     var auth2;
@@ -67,15 +61,6 @@ function signInCallback(authResult) {
         auth2 = gapi.auth2.init();
     });
 
-    function onSignIn() {
-        var profile = auth2.currentUser.get().getBasicProfile();
-        console.log('User logged in.');
-        console.log('ID:', profile.getId());
-        console.log('Name:', profile.getName());
-        console.log('Image URL:', profile.getImageUrl());
-        console.log('Email:', profile.getEmail());
-    } -->
-<!--script>
     function signOut() {
         auth2.signOut().then(function() {
             console.log('User signed out.');

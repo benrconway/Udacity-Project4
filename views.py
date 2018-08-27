@@ -1,6 +1,6 @@
 from models import Base, Users, Categories, Items
 from flask import Flask, jsonify, request, redirect, url_for, abort, flash, \
-    g, render_template
+    g, render_template, make_response
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import create_engine
@@ -26,7 +26,7 @@ app = Flask(__name__)
 
 # Load client id for my google oauth
 CLIENT_ID = json.loads(
-    open('client_secrets.json', 'r').read())['web']['client_id']
+    open('client_secret.json', 'r').read())['web']['client_id']
 
 
 @auth.verify_password
@@ -42,28 +42,31 @@ def verifyPassword(identifier, password):
     g.user = user
     return True
 
+@app.route('/oauth2callback')
+def returnToHome():
+    return redirect(url_for('home'))
 
 @app.route('/oauth/<string:provider>', methods=['POST'])
 def loginWithOauth(provider):
-    oneTimeCode = request.json.get('auth_code')
+    print "Oauth endpoint called"
+    print request.data
+    oneTimeCode = request.data
     if provider == 'google':
         # If google was the provider, exchange the one time code with google
         # for an access token
         try:
-            oauthFlow = flow_from_clientsecrets('client_secrets.json', scope='')
+            oauthFlow = flow_from_clientsecrets('client_secret.json', scope='')
             oauthFlow.redirect_uri = 'postmessage'
-            userCredentials = oauth_flow.step2_exchange(oneTimeCode)
+            userCredentials = oauthFlow.step2_exchange(oneTimeCode)
+
         except FlowExchangeError:
             return respondWith('Failed to authorize with Google', 401)
-
+        print "Made it past check 1"
         # test token validity
         googleAccessToken = userCredentials.access_token
-        url = 'https://googleapis.com/oauth2/v1/tokeninfo?access_token={0}'.format(googleAccessToken)  #NOQA
-        googleResult = requests.get(url)[1].json()
-
-         # refactored because it doesn't make sense to have httplib2 and requests
-        # requestor = httplib2.Http()
-        # googleResult = json.loads(requestor.request(url, 'GET')[1])
+        url = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={0}'.format(googleAccessToken)  #NOQA
+        googleResult = requests.get(url).json()
+        # googleResult = googleResponse.json()
 
         # ensure there was no error before proceeding.
         if googleResult.get('error') is not None:
@@ -75,18 +78,12 @@ def loginWithOauth(provider):
         if googleId != googleResult['user_id']:
             return respondWith("User ID's do not match", 401)
 
-        # 2. The token is has been collected for this web app
-        if googleResult != CLIENT_ID:
+        # # 2. The token is has been collected for this web app
+        if googleResult['issued_to'] != CLIENT_ID:
             return respondWith("Token was not issued for this application", 401)
 
-        # 3. That they are not already signed in.
-        # TODO: create conditional logic that only shows login or logout
-        # and will do correct functionality for that based on switch statement.
-        currentCredentials = login_session.get('credentials')
-        currentGoogleId = login_session.get('googleId')
-        if currentCredentials is not None and googleId == currentGoogleId:
-            return respondWith('User is already connected.', 200)
 
+        print "Made it past all other checks"
 
         userinfoURL = "https://www.googleapis.com/oauth2/v1/userinfo"
         params = {'access_token': googleAccessToken, 'alt':'json'}
@@ -102,11 +99,7 @@ def loginWithOauth(provider):
             user = Users(name=name, email=email)
             dbAddUpdate(user)
 
-        # because the user is not of the website, they will need a token
-        # rather than a using a password to authenticate.
-        # integer is duration
-        token = user.generateToken(600)
-        return jsonify({'token': token.decode('ascii')})
+        return redirect(url_for('home'))
     else:
         return respondWith('Unrecoginized Provider', 500)
 
@@ -240,7 +233,7 @@ def apiSingleItem(category_name, item_id):
     return jsonify(Items=[item.serialize])
 
 def respondWith(message, code):
-    response = make_response(json_dumps(message), code)
+    response = make_response(json.dumps(message), code)
     response.headers['Content-Type'] = 'application/json'
     return response
 
