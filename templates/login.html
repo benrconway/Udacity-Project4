@@ -23,6 +23,14 @@
 
 <div id="result"></div>
 
+<form action="{{url_for('login')}}" method="POST" enctype="multipart/form-data">
+  <label>Name</label>
+  <input type="text" name="name">
+  <label>Password</label>
+  <input type="text" name="password">
+  <input type="submit" value="Login">
+</form>
+
 <script>
 function signInCallback(authResult) {
   if (authResult['code']) {
@@ -43,38 +51,31 @@ function signInCallback(authResult) {
           window.top.location.href = "http://localhost:5000/categories";
         }, 5000);
       } else if (authResult['error']) {
-    console.log('There was an error: ' + authResult['error']);
+    console.log('An error has occured: ' + authResult['error']);
   } else {
-        $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+        $('#result').html('Failed to contact server. Please check console and/or configuration.');
          }
       }
   }); } }
 </script>
 
 
-<!-- TODO: Investigate to understand this code and make my own version -->
-<!--a href='#' onclick="signOut();">Sign Out from Google <a/>
-<!--script>
-    var auth2;
-
-    gapi.load('auth2', function() {
-        auth2 = gapi.auth2.init();
-    });
-
+<!-- Use google example of creating a form and submitting...
+  or making a form that calls a server endpoint that kicks people out of the app
+and google at the same time.-->
+<!-- <a href='#' onclick="signOut();">Sign Out from Google <a/>
+<script>
     function signOut() {
-        auth2.signOut().then(function() {
-            console.log('User signed out.');
-        });
+            const xhr = new XMLHttpRequest();
+            xhr.open()
     }
-    </script>
+
+    // https://accounts.google.com/o/oauth2/revoke?token={token}
+    //
+    </script> -->
 
 
 <!--END GOOGLE SIGN IN CODE -->
-
-
-
-
-
 
   </body>
 </html>

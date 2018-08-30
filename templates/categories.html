@@ -7,6 +7,16 @@
     integrated people, be it with hobbies, foods, practices or a simple walk outdoors. Please enjoy the list and if you would like to expand our collection
     do not hesitate to add your own favourites to the lists.</p>
     <hr>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <ul>
+        {% for message in messages %}
+        <li><strong>{{message}}</strong></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    {% endwith %}
+
     <div class="category-list">
       <p>At Healthy Direction, we have three categories:</p>
       {% for category in categories %}

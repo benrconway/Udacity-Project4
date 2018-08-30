@@ -4,8 +4,6 @@
 <h3>{{category.name}}<h3>
     {% for item in items %}
       <a href='{{url_for('singleItem', category_name=category.name, item_id = item.id)}}'>{{item.name}}</a>
-      <a href='{{url_for('editItem', category_name=category.name, item_id=item.id)}}'>Edit</a>
-      <a href='{{url_for('deleteItem', category_name=category.name, item_id=item.id)}}'>Delete</a>
       <br>
     {% endfor %}
 

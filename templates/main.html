@@ -6,7 +6,10 @@
   </head>
   <body>
     <header>
-
+      <form class="" action="{{login.action}}" method="{{login.method}}">
+        <input type="submit" name="" value="{{login.name}}">
+      </form>
+      <!-- <a href={{login.action}}>{{login.name}}</a> -->
     </header>
     <section class="primary-container">
       {% block content %}

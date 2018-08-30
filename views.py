@@ -1,10 +1,11 @@
 from models import Base, Users, Categories, Items
-from flask import Flask, jsonify, request, redirect, url_for, abort, flash, \
-    g, render_template, make_response
+from flask import Flask, jsonify, request, redirect, url_for, flash
+from flask import session as login_session
+from flask import render_template, make_response
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import create_engine
-from flask import session as login_session
+
 
 from flask.ext.httpauth import HTTPBasicAuth
 import json
@@ -28,18 +29,30 @@ app = Flask(__name__)
 CLIENT_ID = json.loads(
     open('client_secret.json', 'r').read())['web']['client_id']
 
+loginLabel = {'login':{
+                'name':'Login',
+                'action': '/login',
+                'method': 'GET'
+                },
+             'logout': {
+                'name': 'Logout',
+                'action': '/logout',
+                'method': 'POST'
+                }
+            }
 
 @auth.verify_password
 def verifyPassword(identifier, password):
-    # Identifier can be a token or a username, verify will suply which it is.
-    user_id = User.verifyToken(identifier)
+    print "Verify Password is called"
+    # Identifier can be a token or a username, verify will supply which it is.
+    user_id = Users.verifyToken(identifier)
     if user_id:
-        user = session.query(User).filter_by(id = user_id).one()
+        user = session.query(Users).filter_by(id = user_id).one()
     else:
-        user = session.query(User).filter_by(username = identifier).first()
+        user = session.query(Users).filter_by(name = identifier).first()
         if not user or not user.verifyPassword(password):
             return False
-    g.user = user
+    login_session['user'] = user
     return True
 
 @app.route('/oauth2callback')
@@ -64,14 +77,14 @@ def loginWithOauth(provider):
         print "Made it past check 1"
         # test token validity
         googleAccessToken = userCredentials.access_token
-        url = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={0}'.format(googleAccessToken)  #NOQA
-        googleResult = requests.get(url).json()
-        # googleResult = googleResponse.json()
+        url = 'https://www.googleapis.com/oauth2/v1/tokeninfo'
+        params = {'access_token': googleAccessToken }
+        googleResult = requests.get(url, params=params).json()
 
         # ensure there was no error before proceeding.
         if googleResult.get('error') is not None:
             return respondWith(result.get('error'), 500)
-
+        print "This is the access token\n {0}".format(googleAccessToken)
         # ensure that the following is true:
         # 1. Token and given user IDs match
         googleId = userCredentials.id_token['sub']
@@ -82,14 +95,13 @@ def loginWithOauth(provider):
         if googleResult['issued_to'] != CLIENT_ID:
             return respondWith("Token was not issued for this application", 401)
 
-
         print "Made it past all other checks"
 
         userinfoURL = "https://www.googleapis.com/oauth2/v1/userinfo"
         params = {'access_token': googleAccessToken, 'alt':'json'}
         # if it doesn't work, separate request and .json()
         data = requests.get(userinfoURL, params=params).json()
-
+        print data
         name = data['name']
         email = data['email']
 
@@ -99,37 +111,58 @@ def loginWithOauth(provider):
             user = Users(name=name, email=email)
             dbAddUpdate(user)
 
+        login_session['user'] = user
+        login_session['provider'] = "google"
+        login_session['access'] = googleAccessToken
+
         return redirect(url_for('home'))
     else:
         return respondWith('Unrecoginized Provider', 500)
 
 
-@app.route('/token')
-@auth.login_required
-def getAuthToken():
-    token = g.user.generateToken()
-    return jsonify({'token': token.decode('ascii')})
-
 @app.route('/users', methods=['POST'])
 def newUser():
     name = request.form['name']
     password = request.form['password']
+    email = request.form['email']
 
-    if name is None or password is None:
+    if name is None or email is None:
         return respondWith('Missing arguments', 400)
 
     if session.query(Users).filter_by(name=name).first() is not None:
         return respondWith('User already exists', 200)
 
-    user = Users(name=name)
+    user = Users(name=name, email=email)
     user.hashPassword(password)
     dbAddUpdate(user)
     return jsonify({'name': user.name}), 201
 
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    # Logging in with username and password
+    if request.method == 'POST':
+        if verifyPassword(request.form['name'], request.form['password']):
+            flash("Welcome, {0}!".format(request.form['name']))
+            return redirect(url_for('home'))
+        else:
+            flash("Username and/or Password incorrect. Please try again")
+            return redirect(url_for('login'))
+    else:
+        return render_template('login.html')
+
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    if login_session['provider'] == "google":
+        googleLogout(login_session['access'])
+        login_session['user'] = None
+    else:
+        login_session['user'] = None
+
+    flash("You have been logged out.")
+    return redirect(url_for('home'))
+
 
 @app.route('/')
 @app.route('/categories/')
@@ -137,77 +170,138 @@ def home():
     categories = session.query(Categories).all()
     category = Categories()
     items = session.query(Items).all()
-    return render_template('categories.html', categories=categories,
-                           items=items, category=category)
+    if login_session['user'] is None:
+        return render_template('categories.html', categories=categories,
+                           items=items, category=category,
+                           login=loginLabel['login'])
+    else:
+        return render_template('categories.html', categories=categories,
+                           items=items, category=category,
+                           login=loginLabel['logout'])
 
 
 @app.route('/categories/<string:category_name>/')
 @app.route('/categories/<string:category_name>/items')
 def showOneCategoryAndItems(category_name):
+    user = login_session['user']
+    # user = session.merge(user)
     category = session.query(Categories).filter_by(name=category_name).one()
     items = session.query(Items).filter_by(category_id=category.id).all()
-    return render_template('singleCategory.html',
-                           category=category, items=items)
+    if user is None:
+        return render_template('publicSingleCategory.html',
+                                category=category, items=items,
+                                login=loginLabel['login'])
+    else:
+        print
+        return render_template('singleCategory.html',
+                               category=category, items=items, user=user,
+                               login=loginLabel['logout'])
 
 
 @app.route('/categories/<string:category_name>/items/new',
            methods=['GET', 'POST'])
 def newItem(category_name):
+    user = login_session['user']
     category = session.query(Categories).filter_by(name=category_name).one()
+    # User must be logged in to create an item.
+    if user is None:
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
         name = request.form['name']
         description = request.form['description']
         location = request.form['location']
         url = request.form['url']
         item = Items(name=name, description=description, location=location,
-                     url=url, category=category)
+                     url=url, user=user, category=category)
         dbAddUpdate(item)
-        # TODO: Add user from login_session
+
         flash("{0} has been added to {1}.".format(item.name, category.name))
         return redirect(url_for('showOneCategoryAndItems',
                                 category_name=category_name))
     else:
-        return render_template('newItem.html', category=category)
+        return render_template('newItem.html', category=category,
+                               login=loginLabel['logout'])
 
 
 @app.route('/categories/<string:category_name>/items/<int:item_id>/')
 def singleItem(category_name, item_id):
+    user = login_session['user']
+
     category = session.query(Categories).filter_by(name=category_name).one()
     item = session.query(Items).filter_by(id=item_id).one()
-    return render_template('singleItem.html', category=category, item=item)
+    if user is None:
+        return render_template('publicSingleItem.html', category=category,
+                                item=item,
+                                login=loginLabel['login'])
+    else:
+        # user = session.merge(user)
+        return render_template('singleItem.html', category=category,
+                                item=item,
+                                login=loginLabel['logout'])
 
 
 @app.route('/categories/<string:category_name>/items/<int:item_id>/edit',
            methods=['GET', 'POST'])
 def editItem(category_name, item_id):
+    user = login_session['user']
     category = session.query(Categories).filter_by(name=category_name).one()
     item = session.query(Items).filter_by(id=item_id).one()
+    if user is None:
+        return redirect(url_for('login'))
+    user = session.merge(user)
     if request.method == 'POST':
+        # Check IDs match
+        if user.id != item.user_id:
+            flash("You do not have authority to edit {0}.".format(item.name))
+            return redirect(url_for('showOneCategoryAndItems',
+                                        category_name=category_name))
+        # If they do, update the item.
         item.name = request.form['name']
         item.description = request.form['description']
         item.location = request.form['location']
         item.url = request.form['url']
         dbAddUpdate(item)
-        flash("Changes have been successfully made to {0}.".format(item.name))
+        flash("Changes have been successfully made \
+              to {0}.".format(item.name))
         return redirect(url_for('showOneCategoryAndItems',
                         category_name=category_name))
     else:
-        return render_template('editItem.html', category=category, item=item)
+        # Else they are using a GET request.
+        return render_template('editItem.html', category=category,
+                               item=item,
+                               login=loginLabel['logout'])
 
 
 @app.route('/categories/<string:category_name>/items/<int:item_id>/delete',
            methods=['GET', 'POST'])
 def deleteItem(category_name, item_id):
+    user = login_session['user']
+    user = session.merge(user)
     category = session.query(Categories).filter_by(name=category_name).one()
     item = session.query(Items).filter_by(id=item_id).one()
+    # If you aren't logged in, redirect to login.
+    if user is None:
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
-        dbAddUpdate(item)
+        # If posting to delete an object, check the IDs match.
+        if user.id != item.user_id:
+            flash("You do not have authority to delete {0}.".format(item.name))
+            return redirect(url_for('showOneCategoryAndItems',
+                                     category_name=category_name))
+        # If they match, delete the item.
+        session.delete(item)
+        session.commit()
         flash("{0} has been deleted from {1}.".format(item.name,
                                                       category.name))
         return redirect(url_for('showOneCategoryAndItems',
                                 category_name=category_name))
     else:
-        return render_template('deleteItem.html', category=category, item=item)
+        # Else you are using a GET request.
+        return render_template('deleteItem.html', category=category,
+                               item=item,
+                               login=loginLabel['logout'])
 
 
 # Api routes
@@ -240,6 +334,18 @@ def respondWith(message, code):
 def dbAddUpdate(object):
     session.add(object)
     session.commit()
+
+def googleLogout(token):
+    url = 'https://accounts.google.com/o/oauth2/revoke'
+    params = { 'token': token }
+    headers = {'content-type': 'application/x-www-form-urlencoded'}
+    response = requests.post(url, params=params, headers=headers)
+    if response.status_code == 200:
+        return
+    else:
+        return respondWith("Error processing logout", 500)
+
+
 
 if __name__ == '__main__':
     app.secret_key = "password"
