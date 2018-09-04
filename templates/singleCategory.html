@@ -1,7 +1,7 @@
 {% extends 'main.html' %}
 {% block content %}
 <!-- Takes in one category and a list of items -->
-<h3>{{category.name}}<h3>
+<h2>{{category.name}}</h2>
   {% with messages = get_flashed_messages() %}
     {% if messages %}
     <ul>
@@ -12,7 +12,9 @@
     {% endif %}
   {% endwith %}
   <a href='{{url_for('newItem', category_name=category.name)}}'>Add a new item</a><br><br>
+  <div class="secondary-container">
     {% for item in items %}
+    <div class="item-container">
       <a href='{{url_for('singleItem', category_name=category.name, item_id = item.id)}}'>{{item.name}}</a>
       <br><br>
       {% if user.id == item.user_id %}
@@ -20,8 +22,9 @@
       <a href='{{url_for('deleteItem', category_name=category.name, item_id=item.id)}}'>Delete</a>
       <br><br>
       {% endif %}
+    </div>
     {% endfor %}
+  </div>
 
-<a href='{{url_for('home')}}'>Home</a>
 
 {% endblock %}

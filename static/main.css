@@ -1,0 +1,39 @@
+
+body{
+
+}
+
+nav {
+  display:inline;
+}
+
+a {
+  padding:10px;
+  margin: 5px;
+}
+
+.title {
+
+}
+
+.primary-container {
+margin:5px;
+}
+
+.secondary-container {
+  width:60vw;
+}
+
+.category-list {
+margin:10px;
+}
+
+.item-list {
+
+}
+
+.item-container {
+  /* border-top:1px solid green;
+  border-bottom:1px solid green; */
+  margin: 5px;
+}

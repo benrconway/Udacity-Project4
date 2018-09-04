@@ -1,12 +1,12 @@
 <!-- Takes in a single item and its category-->
 {% extends 'main.html' %}
 {% block content %}
-
-<h3>{{item.name}}</h3>
-<p>{{item.description}}</p>
-<p>Location: {{item.location}}</p>
-<a href="{{item.url}}">Website</a>
-<br><br>
-
+<div class="item-container">
+  <h3>{{item.name}}</h3>
+  <p>{{item.description}}</p>
+  <p>Location: {{item.location}}</p>
+  <a href="{{item.url}}">Website</a>
+  <br><br>
+</div>
 
 {% endblock %}

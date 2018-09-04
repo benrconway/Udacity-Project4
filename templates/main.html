@@ -1,22 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Healthy Direction</title>
-  </head>
-  <body>
-    <header>
-      <form class="" action="{{login.action}}" method="{{login.method}}">
-        <input type="submit" name="" value="{{login.name}}">
-      </form>
-      <!-- <a href={{login.action}}>{{login.name}}</a> -->
+
+<head>
+  <meta charset="utf-8">
+  <title>Healthy Direction</title>
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='main.css')}}">
+</head>
+
+<body>
+  <header>
+    <h1>Healthy Direction</h3>
+      <nav>
+      <a href="{{login.action}}">{{login.name}}</a>
+      <a href="/users" style='display: {{login.style}};'>Sign Up</a>
+      <a href='{{url_for('home')}}'>Home</a>
+    </nav>
     </header>
     <section class="primary-container">
       {% block content %}
       {% endblock %}
     </section>
   <footer>
-
+    <p>Brought into existence with the help of the universe, blood sweat and tears.<br>
+      All rights reserved, Mushroom Managers Inc</p>
   </footer>
   </body>
 </html>

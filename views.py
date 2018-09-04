@@ -32,12 +32,12 @@ CLIENT_ID = json.loads(
 loginLabel = {'login':{
                 'name':'Login',
                 'action': '/login',
-                'method': 'GET'
+                'style': 'block'
                 },
              'logout': {
                 'name': 'Logout',
                 'action': '/logout',
-                'method': 'POST'
+                'style': 'none;'
                 }
             }
 
@@ -62,8 +62,8 @@ def returnToHome():
 @app.route('/oauth/<string:provider>', methods=['POST'])
 def loginWithOauth(provider):
     print "Oauth endpoint called"
-    print request.data
-    oneTimeCode = request.data
+    requestData = json.loads(request.data)
+    oneTimeCode = requestData['data']
     if provider == 'google':
         # If google was the provider, exchange the one time code with google
         # for an access token
@@ -120,22 +120,33 @@ def loginWithOauth(provider):
         return respondWith('Unrecoginized Provider', 500)
 
 
-@app.route('/users', methods=['POST'])
+@app.route('/users', methods=['GET', 'POST'])
 def newUser():
-    name = request.form['name']
-    password = request.form['password']
-    email = request.form['email']
 
-    if name is None or email is None:
-        return respondWith('Missing arguments', 400)
+    if request.method == 'POST':
+        name = request.form['name']
+        password = request.form['password']
+        email = request.form['email']
 
-    if session.query(Users).filter_by(name=name).first() is not None:
-        return respondWith('User already exists', 200)
+        if name is None or email is None:
+            flash("Something is missing, please check the form and try again.")
+            return redirect(url_for('newUser'))
 
-    user = Users(name=name, email=email)
-    user.hashPassword(password)
-    dbAddUpdate(user)
-    return jsonify({'name': user.name}), 201
+        if session.query(Users).filter_by(name=name).first() is not None:
+            flash('That name is already taken, please try another.')
+            return redirect(url_for('newUser'))
+
+        user = Users(name=name, email=email)
+        user.hashPassword(password)
+        dbAddUpdate(user)
+        # Get the user back from the DB so that they have an attached ID
+        fromDbUser = session.query(Users).filter_by(email=email).one()
+        login_session['user'] = fromDbUser
+        flash("Welcome {0}, and thank you in advance for all your future \
+               contributions.".format(fromDbUser.name))
+        return redirect(url_for('home'))
+    else:
+        return render_template('signup.html', login=loginLabel['login'])
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -152,7 +163,7 @@ def login():
         return render_template('login.html')
 
 
-@app.route('/logout', methods=['POST'])
+@app.route('/logout')
 def logout():
     if login_session['provider'] == "google":
         googleLogout(login_session['access'])
@@ -160,7 +171,7 @@ def logout():
     else:
         login_session['user'] = None
 
-    flash("You have been logged out.")
+    flash("You have been logged out, we hope you have a lovely day")
     return redirect(url_for('home'))
 
 
@@ -184,7 +195,7 @@ def home():
 @app.route('/categories/<string:category_name>/items')
 def showOneCategoryAndItems(category_name):
     user = login_session['user']
-    # user = session.merge(user)
+    user = session.merge(user)
     category = session.query(Categories).filter_by(name=category_name).one()
     items = session.query(Items).filter_by(category_id=category.id).all()
     if user is None:
@@ -205,6 +216,7 @@ def newItem(category_name):
     category = session.query(Categories).filter_by(name=category_name).one()
     # User must be logged in to create an item.
     if user is None:
+        flash("Sorry, you need to be login to use that.")
         return redirect(url_for('login'))
 
     if request.method == 'POST':
@@ -227,9 +239,9 @@ def newItem(category_name):
 @app.route('/categories/<string:category_name>/items/<int:item_id>/')
 def singleItem(category_name, item_id):
     user = login_session['user']
-
     category = session.query(Categories).filter_by(name=category_name).one()
     item = session.query(Items).filter_by(id=item_id).one()
+
     if user is None:
         return render_template('publicSingleItem.html', category=category,
                                 item=item,
@@ -248,7 +260,9 @@ def editItem(category_name, item_id):
     category = session.query(Categories).filter_by(name=category_name).one()
     item = session.query(Items).filter_by(id=item_id).one()
     if user is None:
+        flash("Sorry, you need to be login to use that.")
         return redirect(url_for('login'))
+
     user = session.merge(user)
     if request.method == 'POST':
         # Check IDs match
@@ -282,6 +296,7 @@ def deleteItem(category_name, item_id):
     item = session.query(Items).filter_by(id=item_id).one()
     # If you aren't logged in, redirect to login.
     if user is None:
+        flash("Sorry, you need to be login to use that.")
         return redirect(url_for('login'))
 
     if request.method == 'POST':

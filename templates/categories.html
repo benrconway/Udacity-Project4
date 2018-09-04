@@ -2,7 +2,7 @@
 {% extends "main.html" %}
 {% block content %}
 <div class="main">
-  <h2>Welcome to Healthy Direction</h2>
+  <h2>Welcome!</h2>
   <p>At Healthy Direction we are striving to provide the resources to allow people to find the information they need to become healthier more
     integrated people, be it with hobbies, foods, practices or a simple walk outdoors. Please enjoy the list and if you would like to expand our collection
     do not hesitate to add your own favourites to the lists.</p>
@@ -20,8 +20,8 @@
     <div class="category-list">
       <p>At Healthy Direction, we have three categories:</p>
       {% for category in categories %}
-      <h3><a href='{{url_for('showOneCategoryAndItems', category_name=category.name)}}'>{{category.name}}</a></h3>
-      <p>{{category.description}}<p>
+      <p class="title"><a href='{{url_for('showOneCategoryAndItems', category_name=category.name)}}'>{{category.name}}</a></p>
+      <span>{{category.description}}<span>
       {% endfor %}
     </div>
 

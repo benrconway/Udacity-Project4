@@ -1,81 +1,94 @@
 <html>
+
 <head>
   <!--Load requirements for google sign-in -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <script src="https://apis.google.com/js/platform.js?onload=start"> </script>
 </head>
+
 <body>
-    <div>
-      <h1>Login</h1>
-    </div>
-    <!-- Google Sign-In button -->
-      <div id="signinButton">
-      <span class="g-signin"
-        data-scope="openid email"
-        data-clientid="591163711704-kdf5rrtgmq6vu63lh0fngqdvl5nib5ji.apps.googleusercontent.com"
-        data-redirecturi="postmessage"
-        data-accesstype="offline"
-        data-cookiepolicy="single_host_origin"
-        data-callback="signInCallback"
-        data-approvalprompt="force">
-      </span>
-    </div>
+  <div>
+    <h1>Login</h1>
+  </div>
+  <!-- Google Sign-In button -->
+  <div id="signinButton">
+    <span class="g-signin"
+      data-scope="openid email"
+      data-clientid="591163711704-kdf5rrtgmq6vu63lh0fngqdvl5nib5ji.apps.googleusercontent.com"
+      data-redirecturi="postmessage"
+      data-accesstype="offline"
+      data-cookiepolicy="single_host_origin"
+      data-callback="signInCallback"
+      data-approvalprompt="force">
+    </span>
+  </div>
 
-<div id="result"></div>
+  <div id="result"></div>
 
-<form action="{{url_for('login')}}" method="POST" enctype="multipart/form-data">
-  <label>Name</label>
-  <input type="text" name="name">
-  <label>Password</label>
-  <input type="text" name="password">
-  <input type="submit" value="Login">
-</form>
+  <div id="form-container">
+    <form action="{{url_for('login')}}" method="POST" enctype="multipart/form-data">
+      <label>Name</label>
+      <input type="text" name="name">
+      <label>Password</label>
+      <input type="text" name="password">
+      <input type="submit" value="Login">
+    </form>
+  </div>
+  <script>
+    function signInCallback(authResult) {
+      if (authResult['code']) {
+        // Hide the sign-in button now that the user is authorized
 
-<script>
-function signInCallback(authResult) {
-  if (authResult['code']) {
-    // Hide the sign-in button now that the user is authorized
-    $('#signinButton').attr('style', 'display: none');
-    // Send the auth-code to the server for further processing
-    $.ajax({
-      type: 'POST',
-      url: '/oauth/google',
-      processData: false,
-      data: authResult['code'],
-      contentType: 'application/octet-stream; charset=utf-8',
-      success: function(result) {
-        // Handle or verify the server response if necessary.
-        if (result) {
-          $('#result').html('Login Successful!</br>'+ result + '</br>Redirecting...')
-         setTimeout(function() {
-          window.top.location.href = "http://localhost:5000/categories";
-        }, 5000);
-      } else if (authResult['error']) {
-    console.log('An error has occured: ' + authResult['error']);
-  } else {
-        $('#result').html('Failed to contact server. Please check console and/or configuration.');
-         }
+        // $('#signinButton').attr('style', 'display: none');
+        // Send the auth-code to the server for further processing
+
+        document.getElementById("signinButton").style.display = 'none';
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', 'oauth/google')
+        let div = document.getElementById('result');
+        let payload = {
+          'data': authResult['code']
+        }
+
+        function success(result){
+          if (result) {
+            div.innerHTML = 'Login successful.<br> Redirecting home.';
+            setTimeout(() => {
+              window.top.location.href = "http://localhost:5000/categories";
+            }, 4000);
+          } else if (authResult['error']) {
+            console.log('An error has occured: ' + authResult['error']);
+          } else {
+            div.innetHTML = 'Failed to contact server. Please check your console or contact administrator.';
+          }
+        }
+        xhr.onload = success;
+        xhr.send(JSON.stringify(payload))
+        div.innerHTML = 'Searching for funghi...'
+
+        // $.ajax({
+        //   type: 'POST',
+        //   url: '/oauth/google',
+        //   processData: false,
+        //   data: authResult['code'],
+        //   contentType: 'application/octet-stream; charset=utf-8',
+        //   success: function(result) {
+        //     // Handle or verify the server response if necessary.
+        //     if (result) {
+        //       $('#result').html('Login Successful!</br>' + result + '</br>Redirecting...')
+        //       setTimeout(function() {
+        //         window.top.location.href = "http://localhost:5000/categories";
+        //       }, 5000);
+        //     } else if (authResult['error']) {
+        //       console.log('An error has occured: ' + authResult['error']);
+        //     } else {
+        //       $('#result').html('Failed to contact server. Please check console and/or configuration.');
+        //     }
+        //   }
+        // });
       }
-  }); } }
-</script>
-
-
-<!-- Use google example of creating a form and submitting...
-  or making a form that calls a server endpoint that kicks people out of the app
-and google at the same time.-->
-<!-- <a href='#' onclick="signOut();">Sign Out from Google <a/>
-<script>
-    function signOut() {
-            const xhr = new XMLHttpRequest();
-            xhr.open()
     }
+  </script>
+</body>
 
-    // https://accounts.google.com/o/oauth2/revoke?token={token}
-    //
-    </script> -->
-
-
-<!--END GOOGLE SIGN IN CODE -->
-
-  </body>
 </html>
