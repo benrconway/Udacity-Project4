@@ -1,27 +1,46 @@
 
 body{
-
+  display: flex;
+  flex-wrap: wrap;
 }
 
 nav {
-  display:inline;
+  display: flex;
+  flex-direction: row;
 }
 
 a {
-  padding:10px;
+  padding: 10px;
   margin: 5px;
 }
 
-.title {
+.form-container{
+  padding:25px;
+  border:1px solid #22BDCC;
+  border-radius: 5px;
+}
 
+.minor-content{
+  margin: auto;
+  padding: 5px;
+  width: 300px;
+  justify-content: center;
+  display: flex;
+  flex-wrap: wrap
+}
+
+
+.title {
+ font-size: 14px;
+ font-weight: 500;
 }
 
 .primary-container {
-margin:5px;
+margin: 5px;
 }
 
 .secondary-container {
-  width:60vw;
+  width: 60vw;
 }
 
 .category-list {
@@ -33,7 +52,14 @@ margin:10px;
 }
 
 .item-container {
-  /* border-top:1px solid green;
-  border-bottom:1px solid green; */
+
   margin: 5px;
 }
+
+/* Branding colours
+  1: turquoise #22BDCC
+  2: grey blue #669499
+  3: green #44FFA8
+  4: peach-ish #FF848B
+  5: indigo(?) #CC2281
+ */
