@@ -29,17 +29,17 @@ app = Flask(__name__)
 CLIENT_ID = json.loads(
     open('client_secret.json', 'r').read())['web']['client_id']
 
-loginLabel = {'login':{
-                'name':'Login',
+loginLabel = {'login': {
+                'name': 'Login',
                 'action': '/login',
                 'style': 'block'
                 },
-             'logout': {
+              'logout': {
                 'name': 'Logout',
                 'action': '/logout',
                 'style': 'none;'
                 }
-            }
+              }
 
 
 @auth.verify_password
@@ -48,17 +48,19 @@ def verifyPassword(identifier, password):
     # Identifier can be a token or a username, verify will supply which it is.
     user_id = Users.verifyToken(identifier)
     if user_id:
-        user = session.query(Users).filter_by(id = user_id).one()
+        user = session.query(Users).filter_by(id=user_id).one()
     else:
-        user = session.query(Users).filter_by(name = identifier).first()
+        user = session.query(Users).filter_by(name=identifier).first()
         if not user or not user.verifyPassword(password):
             return False
     login_session['user'] = user
     return True
 
+
 @app.route('/oauth2callback')
 def returnToHome():
     return redirect(url_for('home'))
+
 
 @app.route('/oauth/<string:provider>', methods=['POST'])
 def loginWithOauth(provider):
@@ -79,7 +81,7 @@ def loginWithOauth(provider):
         # test token validity
         googleAccessToken = userCredentials.access_token
         url = 'https://www.googleapis.com/oauth2/v1/tokeninfo'
-        params = {'access_token': googleAccessToken }
+        params = {'access_token': googleAccessToken}
         googleResult = requests.get(url, params=params).json()
 
         # ensure there was no error before proceeding.
@@ -94,12 +96,13 @@ def loginWithOauth(provider):
 
         # # 2. The token is has been collected for this web app
         if googleResult['issued_to'] != CLIENT_ID:
-            return respondWith("Token was not issued for this application", 401)
+            return respondWith("Token was not issued for this \
+                                application", 401)
 
         print "Made it past all other checks"
 
         userinfoURL = "https://www.googleapis.com/oauth2/v1/userinfo"
-        params = {'access_token': googleAccessToken, 'alt':'json'}
+        params = {'access_token': googleAccessToken, 'alt': 'json'}
         # if it doesn't work, separate request and .json()
         data = requests.get(userinfoURL, params=params).json()
         print data
@@ -186,12 +189,12 @@ def home():
     items = session.query(Items).all()
     if user is None:
         return render_template('categories.html', categories=categories,
-                           items=items, category=category,
-                           login=loginLabel['login'])
+                               items=items, category=category,
+                               login=loginLabel['login'])
     else:
         return render_template('categories.html', categories=categories,
-                           items=items, category=category,
-                           login=loginLabel['logout'])
+                               items=items, category=category,
+                               login=loginLabel['logout'])
 
 
 @app.route('/categories/<string:category_name>/')
@@ -203,8 +206,8 @@ def showOneCategoryAndItems(category_name):
     items = session.query(Items).filter_by(category_id=category.id).all()
     if user is None:
         return render_template('publicSingleCategory.html',
-                                category=category, items=items,
-                                login=loginLabel['login'])
+                               category=category, items=items,
+                               login=loginLabel['login'])
     else:
         user = session.merge(user)
         return render_template('singleCategory.html',
@@ -247,13 +250,13 @@ def singleItem(category_name, item_id):
 
     if user is None:
         return render_template('publicSingleItem.html', category=category,
-                                item=item,
-                                login=loginLabel['login'])
+                               item=item,
+                               login=loginLabel['login'])
     else:
         # user = session.merge(user)
         return render_template('singleItem.html', category=category,
-                                item=item,
-                                login=loginLabel['logout'])
+                               item=item,
+                               login=loginLabel['logout'])
 
 
 @app.route('/categories/<string:category_name>/items/<int:item_id>/edit',
@@ -272,7 +275,7 @@ def editItem(category_name, item_id):
         if user.id != item.user_id:
             flash("You do not have authority to edit {0}.".format(item.name))
             return redirect(url_for('showOneCategoryAndItems',
-                                        category_name=category_name))
+                                    category_name=category_name))
         # If they do, update the item.
         item.name = request.form['name']
         item.description = request.form['description']
@@ -308,7 +311,7 @@ def deleteItem(category_name, item_id):
         if user.id != item.user_id:
             flash("You do not have authority to delete {0}.".format(item.name))
             return redirect(url_for('showOneCategoryAndItems',
-                                     category_name=category_name))
+                                    category_name=category_name))
         # If they match, delete the item.
         session.delete(item)
         session.commit()
@@ -345,25 +348,27 @@ def apiSingleItem(category_name, item_id):
     item = session.query(Items).filter_by(id=item_id).one()
     return jsonify(Items=[item.serialize])
 
+
 def respondWith(message, code):
     response = make_response(json.dumps(message), code)
     response.headers['Content-Type'] = 'application/json'
     return response
 
+
 def dbAddUpdate(object):
     session.add(object)
     session.commit()
 
+
 def googleLogout(token):
     url = 'https://accounts.google.com/o/oauth2/revoke'
-    params = { 'token': token }
+    params = {'token': token}
     headers = {'content-type': 'application/x-www-form-urlencoded'}
     response = requests.post(url, params=params, headers=headers)
     if response.status_code == 200:
         return
     else:
         return respondWith("Error processing logout", 500)
-
 
 
 if __name__ == '__main__':

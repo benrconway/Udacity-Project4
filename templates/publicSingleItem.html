@@ -1,12 +1,14 @@
 <!-- Takes in a single item and its category-->
 {% extends 'main.html' %}
 {% block content %}
-<div class="item-container">
-  <h3>{{item.name}}</h3>
+<div class="content-box">
+  <h3 class="title">{{item.name}}</h3>
   <p>{{item.description}}</p>
   <p>Location: {{item.location}}</p>
-  <a href="{{item.url}}">Website</a>
-  <br><br>
+  <div class="flex-flow-wrap">
+    <a class="breathing-room" href="{{item.url}}">Website</a>
+  </div>
+
 </div>
 
 {% endblock %}

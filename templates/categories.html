@@ -17,16 +17,21 @@
       {% endif %}
     {% endwith %}
 
-    <div class="category-list">
-      <p>At Healthy Direction, we have three categories:</p>
+    <div class="category-list flex-flow-wrap">
+      <div class="full-width">
+          <h3>At Healthy Direction, we have three categories:</h3>
+      </div>
+
       {% for category in categories %}
-      <p class="title"><a href='{{url_for('showOneCategoryAndItems', category_name=category.name)}}'>{{category.name}}</a></p>
-      <span>{{category.description}}<span>
+      <div class="content-box">
+        <p><a class="title" href='{{url_for('showOneCategoryAndItems', category_name=category.name)}}'>{{category.name}}</a></p>
+        <span>{{category.description}}<span>
+      </div>
       {% endfor %}
     </div>
 
     <div class="item-list">
-      <h3>Our full and unfiltered list of content!</h3>
+      <h3>See our full and unfiltered list of content below!</h3>
         <ul>
           {% for item in items %}
             {% for category in categories %}
@@ -39,8 +44,4 @@
     </div>
 
 </div>
-
-
-
-
 {% endblock %}

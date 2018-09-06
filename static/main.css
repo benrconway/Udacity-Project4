@@ -1,23 +1,45 @@
-
-body{
-  display: flex;
-  flex-wrap: wrap;
+h1,
+h2{
+  margin-left: 20px;
 }
 
 nav {
   display: flex;
   flex-direction: row;
+  justify-content: right;
 }
 
 a {
+  color: #975B57;
+}
+footer{
+  margin-top: auto;
+}
+.breathing-room {
+  padding:10px;
+  margin: 5px;
+}
+
+.copyright{
+  font-size:10px;
+}
+
+.content-box{
+  border: 2px solid #4F1221;
+  border-radius: 5px;
   padding: 10px;
   margin: 5px;
+  width:30%;
 }
 
 .form-container{
   padding:25px;
   border:1px solid #22BDCC;
   border-radius: 5px;
+}
+
+.full-width {
+  width:100%
 }
 
 .minor-content{
@@ -29,37 +51,50 @@ a {
   flex-wrap: wrap
 }
 
+.flex-flow-wrap {
+  display:flex;
+  flex-wrap: wrap;
+}
+
+.space-around {
+  justify-content: space-around;
+}
 
 .title {
- font-size: 14px;
- font-weight: 500;
+  color: #2B98BD;
+ font-size: 20px;
+ font-weight: 600;
 }
 
 .primary-container {
-margin: 5px;
+  margin: 5px;
 }
 
 .secondary-container {
   width: 60vw;
 }
 
-.category-list {
-margin:10px;
+.single-box {
+  border: 2px solid #4F1221;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 5px;
+  width:30%;
 }
 
-.item-list {
-
+.category-list {
+  flex-direction: row;
+  margin:10px;
 }
 
 .item-container {
-
   margin: 5px;
 }
 
 /* Branding colours
-  1: turquoise #22BDCC
-  2: grey blue #669499
-  3: green #44FFA8
-  4: peach-ish #FF848B
-  5: indigo(?) #CC2281
+  1: turquoise #2B98BD
+  2: grey blue #000000
+  3: green #2D8A6F
+  4: peach-ish #975B57
+  5: indigo(?) #4F1221
  */

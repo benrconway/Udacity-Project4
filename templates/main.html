@@ -7,20 +7,20 @@
   <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='main.css')}}">
 </head>
 
-<body>
-  <header>
+<body class="flex-flow-wrap">
+  <header class="full-width">
     <h1>Healthy Direction</h3>
       <nav>
-      <a href='{{url_for('home')}}'>Home</a>
-      <a href="/users" style='display: {{login.style}};'>Sign Up</a>
-      <a href="{{login.action}}">{{login.name}}</a>
+      <a class="breathing-room" href='{{url_for('home')}}'>Home</a>
+      <a class="breathing-room" href="/users" style='display: {{login.style}};'>Sign Up</a>
+      <a class="breathing-room" href="{{login.action}}">{{login.name}}</a>
     </nav>
     </header>
-    <section class="primary-container">
+    <section class="primary-container full-width">
       {% block content %}
       {% endblock %}
     </section>
-  <footer>
+  <footer class="copyright">
     <p>Brought into existence with the help of the universe, blood sweat and tears.<br>
       All rights reserved, Mushroom Managers Inc</p>
   </footer>

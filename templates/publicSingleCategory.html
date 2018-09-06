@@ -1,10 +1,12 @@
 {% extends 'main.html' %}
 {% block content %}
 <!-- Takes in one category and a list of items -->
-<h3>{{category.name}}<h3>
+<h2>{{category.name}}</h2>
+  <div class="flex-flow-wrap space-around">
     {% for item in items %}
-      <a href='{{url_for('singleItem', category_name=category.name, item_id = item.id)}}'>{{item.name}}</a>
-      <br>
-    {% endfor %}
-
+    <div class="content-box">
+      <a class="title" href='{{url_for('singleItem', category_name=category.name, item_id = item.id)}}'>{{item.name}}</a>
+    </div>
+      {% endfor %}
+  </div>
 {% endblock %}
