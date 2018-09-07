@@ -30,20 +30,6 @@ class Users(Base):
         s = Serializer(key, expires_in=expiration)
         return s.dumps({'id': self.id})
 
-    @staticmethod
-    def verifyToken(token):
-        s = Serializer(key)
-        try:
-            data = s.loads(token)
-        except SignatureExpired:
-            # If token valid but expired
-            return None
-        except BadSignature:
-            # If token is invalid
-            return None
-            user_id = data['id']
-        return user_id
-
 
 class Categories(Base):
     __tablename__ = 'categories'

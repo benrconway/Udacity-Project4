@@ -44,16 +44,11 @@ loginLabel = {'login': {
 
 
 @auth.verify_password
-def verifyPassword(identifier, password):
+def verifyPassword(name, password):
     print "Verify Password is called"
-    # Identifier can be a token or a username, verify will supply which it is.
-    user_id = Users.verifyToken(identifier)
-    if user_id:
-        user = session.query(Users).filter_by(id=user_id).one()
-    else:
-        user = session.query(Users).filter_by(name=identifier).first()
-        if not user or not user.verifyPassword(password):
-            return False
+    user = session.query(Users).filter_by(name=name).first()
+    if not user or not user.verifyPassword(password):
+        return False
     login_session['user'] = user
     return True
 
