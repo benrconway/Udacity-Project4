@@ -83,7 +83,7 @@ def loginWithOauth(provider):
         # ensure there was no error before proceeding.
         if googleResult.get('error') is not None:
             return respondWith(result.get('error'), 500)
-        print "This is the access token\n {0}".format(googleAccessToken)
+
         # ensure that the following is true:
         # 1. Token and given user IDs match
         googleId = userCredentials.id_token['sub']
@@ -95,13 +95,10 @@ def loginWithOauth(provider):
             return respondWith("Token was not issued for this \
                                 application", 401)
 
-        print "Made it past all other checks"
-
         userinfoURL = "https://www.googleapis.com/oauth2/v1/userinfo"
         params = {'access_token': googleAccessToken, 'alt': 'json'}
         # if it doesn't work, separate request and .json()
         data = requests.get(userinfoURL, params=params).json()
-        print data
         name = data.get('name', None)
         email = data['email']
 
@@ -114,7 +111,7 @@ def loginWithOauth(provider):
         login_session['user'] = user
         login_session['provider'] = "google"
         login_session['access'] = googleAccessToken
-
+        flash("Welcome!")
         return redirect(url_for('home'))
     else:
         return respondWith('Unrecoginized Provider', 500)
