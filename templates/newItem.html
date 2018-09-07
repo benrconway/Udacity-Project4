@@ -1,20 +1,26 @@
 {% extends 'main.html' %}
 {% block content %}
 <!-- Takes in a single category as reference -->
-<h3>Add an item to our content</h3>
-<form action="{{url_for('newItem', category_name=category.name)}}" method="POST" enctype="multipart/form-data">
-  <label for="name">Name</label>
-  <input type="text" name="name" value="">
-    </br>
-  <label for="description">Description</label>
-  <input type="text" name="description" value="">
-    </br>
-  <label for="location">Location</label>
-  <input type="text" name="location" value="">
-    </br>
-  <label for="url">URL</label>
-  <input type="text" name="url" value="">
-    </br>
-  <input type="submit" value="Create">
-</form>
+<section class="minor-content flex-flow-wrap">
+  <h3>Add an item to our content</h3>
+  <div class="form-container">
+    <form action="{{url_for('newItem', category_name=category.name)}}" method="POST" enctype="multipart/form-data">
+      <label for="name">Name</label>
+      <input type="text" name="name" value="">
+        </br>
+      <label for="description">Description</label>
+      <input type="text" name="description" value="">
+        </br>
+      <label for="location">Location</label>
+      <input type="text" name="location" value="">
+        </br>
+      <label for="url">URL</label>
+      <input type="text" name="url" value="">
+        </br>
+      <input class="breathing-room" type="submit" value="Create">
+    </form>
+      <a class="breathing-room" href='{{url_for('showOneCategoryAndItems', category_name=category.name)}}'>Back</a>
+  </div>
+</section>
+
 {% endblock %}

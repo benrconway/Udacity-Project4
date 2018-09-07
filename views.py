@@ -256,7 +256,8 @@ def singleItem(category_name, item_id):
         # user = session.merge(user)
         return render_template('singleItem.html', category=category,
                                item=item,
-                               login=loginLabel['logout'])
+                               login=loginLabel['logout'],
+                               user=user)
 
 
 @app.route('/categories/<string:category_name>/items/<int:item_id>/edit',

@@ -1,7 +1,7 @@
 {% extends 'main.html' %}
 {% block content %}
 <!-- TODO: Sign Up page which posts to users. -->
-<section class="minor-content">
+<section class="minor-content flex-flow-wrap">
   <div class="form-container">
     <form class="" action="{{url_for('newUser')}}" method="POST" enctype="multipart/form-data">
       <label for="name">Name:</label>
@@ -10,8 +10,8 @@
       <input type="text" name="password" value="">
       <label for="email">Email Address:</label>
       <input type="text" name="email" value="">
-      <input type="submit" value="Join">
-    </form>  
+      <input class="breathing-room" type="submit" value="Join">
+    </form>
   </div>
 </section>
 

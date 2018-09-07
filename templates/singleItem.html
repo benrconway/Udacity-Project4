@@ -7,9 +7,12 @@
   <p>Location: {{item.location}}</p>
   <div class="flex-flow-wrap">
     <a class="breathing-room" href="{{item.url}}">Website</a>
+    {% if item.user_id == user.id %}
     <br><br>
     <a class="breathing-room" href='{{url_for('editItem', category_name=category.name, item_id=item.id)}}'>Edit</a>
     <a class="breathing-room" href='{{url_for('deleteItem', category_name=category.name, item_id=item.id)}}'>Delete</a>
+    {% endif %}
+    <a class="breathing-room" href='{{url_for('showOneCategoryAndItems', category_name=category.name)}}'>Back</a>
   </div>
 
 </div>
