@@ -4,7 +4,7 @@
 
 - Authentication and Authorization
 - How to plan and build an API
-- Using python Flask to create a server for **serving** up information for the consumtion of users on the website, or
+- Using python Flask to create a server for **serving** up information for the consumption of users on the website, or
  individuals wishing to consume our API
 - Understanding how to secure access and ensure proper API and information hygiene
 - etc.
@@ -35,8 +35,24 @@ Navigate into the cloned repository and then into the subdirectory 'vagrant'. In
 
 Once it has completed, clone this project into the '/vagrant' directory, this will now be available to run within the vagrant virtual machine that is currently running.
 
-Now use the command 'vagrant ssh' to move into the newly created Virtual Machine (VM), once inside, run the command 'python database_setup.py' (which will create the appropriate database and seed it with the catalogue data).
+Now use the command 'vagrant ssh' to move into the newly created Virtual Machine (VM), once inside, run the commands 'python models.py' & 'python database_setup.py' (which will create the appropriate database and seed it with the catalogue data).
 
 Now you should be setup and ready to go. To run this Flask server please use the command 'python views.py', enter the port you would like to use (or leave it blank for http://localhost:5000/) and navigate to that address in your favourite browser.
 
 If everything has been successful, you should be presented with my project.
+
+## Exploring the project:
+
+The website should show you all the details of the categories and their items, however it isn't until you
+sign in that you can see the functionality for Adding, Editing or Deleting items. To address this though
+you have two options:
+1) Sign in with Google and add a few items of your own
+2) Join up and sign in, then add some of your own items, or;
+3) Login with the Username: Ben and Password: password
+
+With the final option you will be able to perform add/edit/delete functionality for all objects currently being shown.
+
+If you find any bugs or have any comments, please send them to myself here at Github, or to my email address of
+benrconway84@gmail.com
+
+Thank you and I hope you enjoy my first foray into Authentication and Authorization.
