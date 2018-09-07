@@ -29,6 +29,7 @@ app = Flask(__name__)
 CLIENT_ID = json.loads(
     open('client_secret.json', 'r').read())['web']['client_id']
 
+# Supplies information as to the state of my login a-tag
 loginLabel = {'login': {
                 'name': 'Login',
                 'action': '/login',
