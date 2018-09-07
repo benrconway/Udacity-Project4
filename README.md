@@ -52,6 +52,17 @@ you have two options:
 
 With the final option you will be able to perform add/edit/delete functionality for all objects currently being shown.
 
+### API Endpoints:
+
+You can explore the api without authorization, however there is no functionality for editing information through the supplied endpoints at present.
+
+1) /api/categories/ <br>
+Shows all the categories and all the items <br>
+2) /api/categories/<category_name>/items <br>
+Provides all the items of a given category, the name is supplied as a string (Nature, Nurture or Nutrition) <br>
+3) /api/categories/<category_name>/items/item_id/ <br>
+Provides only the single item from the selected category. <br>
+
 If you find any bugs or have any comments, please send them to myself here at Github, or to my email address of
 benrconway84@gmail.com
 
