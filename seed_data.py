@@ -75,7 +75,7 @@ category = Categories(name="Nurture",
 
 item = Items(name="Wudang Daoism",
              description="The web portal to classes and information about \
-             Wudang Kungfu and Daoism from Jeff Reid.",location="Unknown",
+             Wudang Kungfu and Daoism from Jeff Reid.", location="Unknown",
              url="https://www.wudangdaoism.com/", user=user, category=category)
 
 session.add(item)
@@ -92,7 +92,7 @@ session.commit()
 
 item = Items(name="Bai He Alba",
              description="The web presence of the White Crane School of \
-             Martial Arts in Scotland.",location="Scotland",
+             Martial Arts in Scotland.", location="Scotland",
              url="http://www.whitecranescotland.com/", user=user,
              category=category)
 
@@ -101,7 +101,7 @@ session.commit()
 
 item = Items(name="Wudang Australis",
              description="The portal to information about classes being run \
-             by Benjamin Conway",location="Scotland",
+             by Benjamin Conway", location="Scotland",
              url="https://www.wudangaus.com/",
              user=user, category=category)
 

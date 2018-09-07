@@ -22,6 +22,11 @@ footer{
   margin: 5px;
 }
 
+.category-list {
+  flex-direction: row;
+  margin:10px;
+}
+
 .copyright{
   font-size:10px;
 }
@@ -60,6 +65,10 @@ footer{
   justify-content: center;
 }
 
+.primary-container {
+  margin: 5px;
+}
+
 .space-around {
   justify-content: space-around;
 }
@@ -70,35 +79,6 @@ footer{
  font-weight: 600;
 }
 
-.primary-container {
-  margin: 5px;
-}
-
 .secondary-container {
   width: 350px;
 }
-
-.single-box {
-  border: 2px solid #4F1221;
-  border-radius: 5px;
-  padding: 10px;
-  margin: 5px;
-  width:30%;
-}
-
-.category-list {
-  flex-direction: row;
-  margin:10px;
-}
-
-.item-container {
-  margin: 5px;
-}
-
-/* Branding colours
-  1: turquoise #2B98BD
-  2: grey blue #000000
-  3: green #2D8A6F
-  4: peach-ish #975B57
-  5: indigo(?) #4F1221
- */

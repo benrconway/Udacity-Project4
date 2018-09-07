@@ -3,12 +3,15 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 from passlib.apps import custom_app_context as pwd_context
-import random, string
-from itsdangerous import(TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
+import random
+import string
+from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)  # NOQA
 
 
 Base = declarative_base()
-key = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+key = ''.join(random.choice(string.ascii_uppercase +
+              string.digits) for x in xrange(32))
+
 
 class Users(Base):
     __tablename__ = 'users'
@@ -24,22 +27,22 @@ class Users(Base):
         return pwd_context.verify(password, self.password_hash)
 
     def generateToken(self, expiration=600):
-    	s = Serializer(key, expires_in = expiration)
-    	return s.dumps({'id': self.id })
+        s = Serializer(key, expires_in=expiration)
+        return s.dumps({'id': self.id})
 
     @staticmethod
     def verifyToken(token):
-    	s = Serializer(key)
-    	try:
-    		data = s.loads(token)
-    	except SignatureExpired:
-    		#Valid Token, but expired
-    		return None
-    	except BadSignature:
-    		#Invalid Token
-    		return None
-    	user_id = data['id']
-    	return user_id
+        s = Serializer(key)
+        try:
+            data = s.loads(token)
+        except SignatureExpired:
+            # If token valid but expired
+            return None
+        except BadSignature:
+            # If token is invalid
+            return None
+            user_id = data['id']
+        return user_id
 
 
 class Categories(Base):
