@@ -6,17 +6,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import create_engine
 
-
-from flask.ext.httpauth import HTTPBasicAuth
-import json
-
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import httplib2
 from flask import make_response
 import requests
+import json
 
-auth = HTTPBasicAuth()
 
 engine = create_engine('sqlite:///itemcatalogue.db')
 
@@ -41,16 +37,6 @@ loginLabel = {'login': {
                 'style': 'none;'
                 }
               }
-
-
-@auth.verify_password
-def verifyPassword(name, password):
-    print "Verify Password is called"
-    user = session.query(Users).filter_by(name=name).first()
-    if not user or not user.verifyPassword(password):
-        return False
-    login_session['user'] = user
-    return True
 
 
 @app.route('/oauth2callback')
@@ -105,13 +91,14 @@ def loginWithOauth(provider):
         # check to see if they already exist.
         user = session.query(Users).filter_by(email=email).first()
         if not user:
+            if name is None:
+                name = email.split('@')[0]
             user = Users(name=name, email=email)
             dbAddUpdate(user)
 
         login_session['user'] = user
         login_session['provider'] = "google"
         login_session['access'] = googleAccessToken
-        flash("Welcome!")
         return redirect(url_for('home'))
     else:
         return respondWith('Unrecoginized Provider', 500)
@@ -246,7 +233,7 @@ def singleItem(category_name, item_id):
                                item=item,
                                login=loginLabel['login'])
     else:
-        # user = session.merge(user)
+        user = session.merge(user)
         return render_template('singleItem.html', category=category,
                                item=item,
                                login=loginLabel['logout'],
@@ -363,6 +350,15 @@ def googleLogout(token):
         return
     else:
         return respondWith("Error processing logout", 500)
+
+
+def verifyPassword(name, password):
+    print "Verify Password is called"
+    user = session.query(Users).filter_by(name=name).first()
+    if not user or not user.verifyPassword(password):
+        return False
+    login_session['user'] = user
+    return True
 
 
 if __name__ == '__main__':
