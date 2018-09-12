@@ -35,9 +35,12 @@ Navigate into the cloned repository and then into the subdirectory 'vagrant'. In
 
 Once it has completed, clone this project into the '/vagrant' directory, this will now be available to run within the vagrant virtual machine that is currently running.
 
-Now use the command 'vagrant ssh' to move into the newly created Virtual Machine (VM), once inside, run the commands 'python models.py' & 'python database_setup.py' (which will create the appropriate database and seed it with the catalogue data).
+Now use the command 'vagrant ssh' to move into the newly created Virtual Machine (VM). Once there, you will need
+the following commands:
+1) cd /vagrant/<project name> (move you into my project in the directory)
+2) sh run_project.sh (which will downgrade flask, run models, seed_data and then views.py)
 
-Now you should be setup and ready to go. To run this Flask server please use the command 'python views.py', enter the port you would like to use (or leave it blank for http://localhost:5000/) and navigate to that address in your favourite browser.
+All that running successfully, then you will be able to navigate in your browser to *`http://localhost:5000/`*
 
 If everything has been successful, you should be presented with my project.
 
@@ -63,7 +66,9 @@ Provides all the items of a given category, the name is supplied as a string (Na
 3) /api/categories/<category_name>/items/item_id/ <br>
 Provides only the single item from the selected category. <br>
 
-If you find any bugs or have any comments, please send them to myself here at Github, or to my email address of
+If you have any comments, please send them to myself here at Github, or to my email address of
 benrconway84@gmail.com
+
+If you find bugs, please supply me with the steps you followed to reproduce what operating system and copy of your 'pip list' output so that I may more faithfully reproduce any errors.
 
 Thank you and I hope you enjoy my first foray into Authentication and Authorization.
