@@ -326,7 +326,7 @@ def apiCatagoryAndItems(category_name):
 
 @app.route('/api/categories/<string:category_name>/items/<int:item_id>')
 def apiSingleItem(category_name, item_id):
-    item = session.query(Items).filter_by(id=item_id).one()
+    item = session.query(Items).filter_by(id=item_id).one_or_none()
     return jsonify(Items=[item.serialize])
 
 
