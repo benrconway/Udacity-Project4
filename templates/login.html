@@ -48,14 +48,17 @@
     <script>
       function signInCallback(authResult) {
         if (authResult['code']) {
-
+          let state = '{{state}}'
+          console.log(state);
           document.getElementById("signinButton").style.display = 'none';
           let xhr = new XMLHttpRequest();
           xhr.open('POST', 'oauth/google')
           let div = document.getElementById('result');
           let payload = {
-            'data': authResult['code']
+            'data': authResult['code'],
+            'state': '{{state}}'
           }
+          console.log(payload);
 
           function success(result) {
             if (result) {
@@ -66,10 +69,11 @@
             } else if (authResult['error']) {
               console.log('An error has occured: ' + authResult['error']);
             } else {
-              div.innetHTML = 'Failed to contact server. Please check your console or contact administrator.';
+              div.innerHTML = 'Failed to contact server. Please check your console or contact administrator.';
             }
           }
           xhr.onload = success;
+          xhr.onerror = (error, response) => {div.innerHTML=`${console.log(response)}, ${ console.log(error)}`};
           xhr.send(JSON.stringify(payload))
           div.innerHTML = 'Searching for funghi... \n\n'
         }

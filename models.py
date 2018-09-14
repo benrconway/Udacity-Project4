@@ -38,6 +38,9 @@ class Categories(Base):
     description = Column(String(250))
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship(Users)
+    # if a category is deleted, then all their items should also be deleted.
+    item = relationship("Items", cascade="all,delete, delete-orphan",
+                        backref="Categories")
 
     @property
     def serialize(self):

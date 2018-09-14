@@ -12,6 +12,8 @@ import httplib2
 from flask import make_response
 import requests
 import json
+import random
+import string
 
 
 engine = create_engine('sqlite:///itemcatalogue.db')
@@ -46,8 +48,10 @@ def returnToHome():
 
 @app.route('/oauth/<string:provider>', methods=['POST'])
 def loginWithOauth(provider):
-    # print "Oauth endpoint called"
     requestData = json.loads(request.data)
+    if requestData['state'] != login_session['state']:
+        flash("Login error, please try again.")
+        return redirect(url_for('login'))
     oneTimeCode = requestData['data']
     if provider == 'google':
         # If google was the provider, exchange the one time code with google
@@ -142,9 +146,13 @@ def login():
             return redirect(url_for('home'))
         else:
             flash("Username and/or Password incorrect. Please try again")
-            return redirect(url_for('login'))
+            return redirect(url_for('login'), client_id=CLIENT_ID)
     else:
-        return render_template('login.html')
+        # Create a random string token and save it to the login_session
+        state = ''.join(random.choice(string.ascii_uppercase +
+                        string.digits) for x in xrange(32))
+        login_session['state'] = state
+        return render_template('login.html', client_id=CLIENT_ID, state=state)
 
 
 @app.route('/logout')
