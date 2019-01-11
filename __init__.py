@@ -16,7 +16,8 @@ import random
 import string
 
 
-engine = create_engine('sqlite:///itemcatalogue.db')
+# engine = create_engine('sqlite:///itemcatalogue.db')
+engine = create_engine('postgresl://ubuntu:password@localhost/catalog')
 
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
