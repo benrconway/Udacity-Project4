@@ -17,7 +17,7 @@ import string
 
 
 # engine = create_engine('sqlite:///itemcatalogue.db')
-engine = create_engine('postgresl://ubuntu:password@localhost/catalog')
+engine = create_engine('postgresql://ubuntu:password@localhost/catalog')
 
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
@@ -26,7 +26,7 @@ app = Flask(__name__)
 
 # Load client id for my google oauth
 CLIENT_ID = json.loads(
-    open('client_secret.json', 'r').read())['web']['client_id']
+    open('/var/www/UdacityProject4/UdacityProject4/client_secret.json', 'r').read())['web']['client_id']
 
 # Supplies information as to the state of my login a-tag
 loginLabel = {'login': {
