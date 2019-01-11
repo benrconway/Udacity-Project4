@@ -3,4 +3,4 @@ rm itemcatalogue.db
 rm models.pyc
 python models.py
 python seed_data.py
-python views.py
+python __init__.py
