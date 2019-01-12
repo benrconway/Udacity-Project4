@@ -11,10 +11,10 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
 session = DBSession()
-
+print "14"
 user = Users(name="Ben", email="email@email.com")
 user.hashPassword("password")
-
+print "user created"
 category = Categories(name="Nature",
                       description="A list of courses and information relating \
                       to being out and at one with our natural surroundings",
@@ -29,6 +29,7 @@ item = Items(name="Monica Wilde",
 
 session.add(item)
 session.commit()
+print "32"
 
 item = Items(name="Back Country Survival",
              description="Outdoor survival courses available in Scotland.",
@@ -37,6 +38,7 @@ item = Items(name="Back Country Survival",
 
 session.add(item)
 session.commit()
+print "41"
 
 item = Items(name="Woodland Way",
              description="Outdoor training and survival courses available in \

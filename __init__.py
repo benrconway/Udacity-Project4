@@ -147,7 +147,8 @@ def login():
             return redirect(url_for('home'))
         else:
             flash("Username and/or Password incorrect. Please try again")
-            return redirect(url_for('login'), client_id=CLIENT_ID)
+            # return redirect(url_for('login'), client_id=CLIENT_ID)
+            return redirect(url_for('login'))
     else:
         # Create a random string token and save it to the login_session
         state = ''.join(random.choice(string.ascii_uppercase +
