@@ -20,6 +20,15 @@ class Users(Base):
     email = Column(String(250), nullable=False)
     password_hash = Column(String(250))
 
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email,
+            'password_hash': self.password_hash
+        }
+
     def hashPassword(self, password):
         self.password_hash = pwd_context.encrypt(password)
 
@@ -30,15 +39,6 @@ class Users(Base):
         s = Serializer(key, expires_in=expiration)
         return s.dumps({'id': self.id})
 
-    @property
-    def serialize(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'email': self.email,
-            'password_hash': self.password_hash
-        }
-        
 
 class Categories(Base):
     __tablename__ = 'categories'
@@ -88,10 +88,5 @@ class Items(Base):
 
 engine = create_engine('postgresql://ubuntu:password@localhost/catalog')
 # engine = create_engine('sqlite:///itemcatalogue.db')
-
-Users.__table__.drop(engine);
-Categories.__table__.drop(engine);
-Items.__table__.drop(engine);
-
 
 Base.metadata.create_all(engine)
