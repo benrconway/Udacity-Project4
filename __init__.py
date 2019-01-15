@@ -368,6 +368,7 @@ def verifyPassword(name, password):
     if not user or not user.verifyPassword(password):
         return False
     login_session['user'] = user
+    login_session['provider'] = None
     return True
 
 
