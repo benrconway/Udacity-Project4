@@ -14,7 +14,7 @@ import requests
 import json
 import random
 import string
-
+import os
 
 # engine = create_engine('sqlite:///itemcatalogue.db')
 engine = create_engine('postgresql://ubuntu:password@localhost/catalog')
@@ -24,9 +24,10 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 app = Flask(__name__)
 
+secret_path = '/var/www/UdacityProject4/client_secret.json'
+
 # Load client id for my google oauth
-CLIENT_ID = json.loads(
-    open('/var/www/UdacityProject4/UdacityProject4/client_secret.json', 'r').read())['web']['client_id']
+CLIENT_ID = json.loads(open(secret_path, 'r').read())['web']['client_id']
 
 # Supplies information as to the state of my login a-tag
 loginLabel = {'login': {
@@ -58,8 +59,8 @@ def loginWithOauth(provider):
         # If google was the provider, exchange the one time code with google
         # for an access token
         try:
-            oauthFlow = flow_from_clientsecrets('/var/www/UdacityProject4/UdacityProject4/client_secret.json', scope='')
-            oauthFlow.redirect_uri = 'postmessage'
+            oauthFlow = flow_from_clientsecrets(secret_path, scope='')
+	    oauthFlow.redirect_uri = 'postmessage'
             userCredentials = oauthFlow.step2_exchange(oneTimeCode)
 
         except FlowExchangeError:
@@ -100,7 +101,7 @@ def loginWithOauth(provider):
                 name = email.split('@')[0]
             user = Users(name=name, email=email)
             dbAddUpdate(user)
-        print "about to set login_session information"
+        
         login_session['user'] = user
         login_session['provider'] = "google"
         login_session['access'] = googleAccessToken
