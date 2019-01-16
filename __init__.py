@@ -58,7 +58,7 @@ def loginWithOauth(provider):
         # If google was the provider, exchange the one time code with google
         # for an access token
         try:
-            oauthFlow = flow_from_clientsecrets('client_secret.json', scope='')
+            oauthFlow = flow_from_clientsecrets('/var/www/UdacityProject4/UdacityProject4/client_secret.json', scope='')
             oauthFlow.redirect_uri = 'postmessage'
             userCredentials = oauthFlow.step2_exchange(oneTimeCode)
 
