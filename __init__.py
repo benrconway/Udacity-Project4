@@ -100,7 +100,7 @@ def loginWithOauth(provider):
                 name = email.split('@')[0]
             user = Users(name=name, email=email)
             dbAddUpdate(user)
-
+        print "about to set login_session information"
         login_session['user'] = user
         login_session['provider'] = "google"
         login_session['access'] = googleAccessToken
